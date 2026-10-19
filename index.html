@@ -14,9 +14,9 @@
         <div class="container">
             <h1 class="checker-hero-title">CSS 选择器命名规范检测</h1>
             <p class="checker-hero-desc">
-                依据《HTML 页面 CSS 选择器命名规范》v1.0 严格检测：默认不合规，只有能归入职责分层且命中词表/形态的类名才会通过。随意英文词、无业务前缀的裸类型、非白名单状态词一律拒绝。
+                按 Stylelint 规则检测：类名须符合 BEM（block / block__element / block--modifier）、状态类（is-* / has-*）或命名空间（l-* / g-* / u-*）。禁止在 CSS 中为 js-* 钩子写样式。
             </p>
-            <p class="checker-hero-meta">仅通过：page-* · 业务+模块类型 · 结构类 · is-*/has-*（白名单）· js-*-* · 原子白名单 · 插件类</p>
+            <p class="checker-hero-meta">同时检查：嵌套深度 ≤ 3 · 禁用 ID · 复合选择器 ≤ 3 · 变量 / mixin / function 使用 kebab-case</p>
         </div>
     </div>
 
@@ -92,51 +92,51 @@
             <h2 class="checker-panel-title">规范速查</h2>
             <div class="checker-rules-grid">
                 <article class="checker-rule-card">
-                    <h3 class="checker-rule-title">基础命名</h3>
-                    <p class="checker-rule-desc">小写英文 + 短横线；禁止驼峰、下划线、拼音、无意义名、纯视觉名。</p>
+                    <h3 class="checker-rule-title">BEM 块</h3>
+                    <p class="checker-rule-desc">全小写短横线。允许 block、block__element、block--modifier、block__element--modifier。只保留一层 __ 和一层 --。</p>
                     <ul class="checker-rule-examples">
-                        <li class="is-good">✓ product-card</li>
-                        <li class="is-bad">✗ productCard / tijiao-btn / box1 / red-title</li>
+                        <li class="is-good">✓ cart / cart__item / cart--compact</li>
+                        <li class="is-bad">✗ cart__item__price / ProductCard / product_card</li>
                     </ul>
                 </article>
                 <article class="checker-rule-card">
                     <h3 class="checker-rule-title">状态类</h3>
-                    <p class="checker-rule-desc">统一 is-* / has-*，禁止裸 active、show、error。</p>
+                    <p class="checker-rule-desc">SMACSS 状态：is-*、has-*，后接小写短横线。</p>
                     <ul class="checker-rule-examples">
                         <li class="is-good">✓ is-active / has-error</li>
-                        <li class="is-bad">✗ active / show / error</li>
+                        <li class="is-bad">✗ Is-Active / is-</li>
+                    </ul>
+                </article>
+                <article class="checker-rule-card">
+                    <h3 class="checker-rule-title">命名空间</h3>
+                    <p class="checker-rule-desc">l- 布局、g- 全局、u- 工具类。</p>
+                    <ul class="checker-rule-examples">
+                        <li class="is-good">✓ l-grid / g-container / u-mt-8</li>
+                        <li class="is-bad">✗ L-grid / u-</li>
                     </ul>
                 </article>
                 <article class="checker-rule-card">
                     <h3 class="checker-rule-title">JS 钩子</h3>
-                    <p class="checker-rule-desc">事件绑定使用 js-* 或 data-*，不依赖样式类；业务数据写入 data-*。</p>
+                    <p class="checker-rule-desc">禁止在 CSS 中为 js-* 编写样式。钩子只放在 HTML 上。</p>
                     <ul class="checker-rule-examples">
-                        <li class="is-good">✓ js-submit-btn</li>
-                        <li class="is-bad">✗ 用 mt20 / f16 绑定 JS</li>
+                        <li class="is-good">✓ HTML 上使用 js-submit-btn</li>
+                        <li class="is-bad">✗ .js-submit-btn { }</li>
                     </ul>
                 </article>
                 <article class="checker-rule-card">
-                    <h3 class="checker-rule-title">职责分层</h3>
-                    <p class="checker-rule-desc">page-* 页面作用域；模块类标识业务区；结构类放在模块内；原子类处理通用表现。</p>
+                    <h3 class="checker-rule-title">选择器权重</h3>
+                    <p class="checker-rule-desc">嵌套最多 3 层（伪类、@media、@supports、@include 不计）。禁用 ID。复合选择器最多 3 段。</p>
                     <ul class="checker-rule-examples">
-                        <li class="is-good">✓ page-product-detail</li>
-                        <li class="is-good">✓ verify-modal / card-body / mt20</li>
+                        <li class="is-good">✓ .cart .cart__item.is-selected</li>
+                        <li class="is-bad">✗ #app / .a .b .c .d</li>
                     </ul>
                 </article>
                 <article class="checker-rule-card">
-                    <h3 class="checker-rule-title">缩写</h3>
-                    <p class="checker-rule-desc">仅使用通用缩写 btn / img / desc / nav；禁止 prd / vfy / mdl。</p>
+                    <h3 class="checker-rule-title">SCSS 命名</h3>
+                    <p class="checker-rule-desc">变量、mixin、function 一律 kebab-case。</p>
                     <ul class="checker-rule-examples">
-                        <li class="is-good">✓ submit-btn</li>
-                        <li class="is-bad">✗ prd-list / vfy-modal</li>
-                    </ul>
-                </article>
-                <article class="checker-rule-card">
-                    <h3 class="checker-rule-title">插件类</h3>
-                    <p class="checker-rule-desc">Slick / PerfectScrollbar / iconfont 等保持原样，覆盖样式限制在模块作用域内。</p>
-                    <ul class="checker-rule-examples">
-                        <li class="is-good">✓ .verify-thumb-list .slick-current</li>
-                        <li class="is-bad">✗ 全局 .slick-current</li>
+                        <li class="is-good">✓ $color-primary / text-truncate</li>
+                        <li class="is-bad">✗ $ColorPrimary / TextTruncate</li>
                     </ul>
                 </article>
             </div>

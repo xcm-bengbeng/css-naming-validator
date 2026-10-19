@@ -2,18 +2,16 @@
 
 纯静态页面，不依赖后端。上传到 GitHub 后用 GitHub Pages 即可在线运行。
 
-依据《HTML 页面 CSS 选择器命名规范》v1.0，**默认拒绝**，仅当类名符合职责分层时通过：
+按 Stylelint `selector-class-pattern` 检测类名：
 
 | 类型 | 通过条件 |
 |------|----------|
-| 页面类 | `page-product-detail`（单段仅允许 home/cart 等白名单） |
-| 模块类 | `业务名 + 模块类型`，如 `product-card`、`verify-modal` |
-| 结构类 | `card-header`、`item-title`、`primary-btn` |
-| 状态类 | `is-*` / `has-*` 且状态词在规范白名单内 |
-| JS 钩子 | `js-` + 至少两段，且含角色词（btn/modal/…） |
-| 原子 / 插件 | 封闭白名单或 slick/ps/icon 前缀 |
+| BEM | `block`、`block__element`、`block--modifier`、`block__element--modifier`（只允许一层 `__` 和一层 `--`） |
+| 状态类 | `is-*`、`has-*` |
+| 命名空间 | `l-*` 布局、`g-*` 全局、`u-*` 工具 |
+| JS 钩子 | `js-*` 不能作为 CSS 类名使用 |
 
-`hello`、`apple`、`hello-world`、`is-happy`、`js-foo` 等随意命名都会判为不合规。
+SCSS 模式还会检查：嵌套深度 ≤ 3（伪类、`@media`、`@supports`、`@include` 不计）、禁用 ID、复合选择器 ≤ 3、变量 / mixin / function 使用 kebab-case。
 
 ## 上传并运行
 

@@ -405,134 +405,20 @@
     "about",
     "contact"
   ]);
-  var ATOMIC_EXACT = /* @__PURE__ */ new Set([
-    "d-flex",
-    "d-none",
-    "d-block",
-    "d-inline",
-    "d-inline-block",
-    "d-inline-flex",
-    "d-grid",
-    "d-table",
-    "d-table-row",
-    "d-table-cell",
-    "fwb",
-    "fwn",
-    "fwi",
-    "relative",
-    "absolute",
-    "fixed",
-    "sticky",
-    "clearfix",
-    "ellipsis",
-    "text-ellipsis",
-    "pointer",
-    "cursor-pointer",
-    "w-full",
-    "h-full",
-    "min-w-0",
-    "flex-grow-1",
-    "flex-shrink-0",
-    "flex-1",
-    "flex-wrap",
-    "flex-nowrap",
-    "flex-column",
-    "flex-row",
-    "align-items-center",
-    "align-items-start",
-    "align-items-end",
-    "justify-content-center",
-    "justify-content-between",
-    "justify-content-around",
-    "justify-content-start",
-    "justify-content-end",
-    "text-center",
-    "text-left",
-    "text-right",
-    "text-start",
-    "text-end",
-    "font-bold",
-    "font-normal",
-    "font-italic",
-    "font-medium",
-    "bg-white",
-    "bg-transparent",
-    "overflow-hidden",
-    "overflow-auto",
-    "rounded",
-    "border",
-    "border-0",
-    "shadow",
-    "shadow-none",
-    // 布局原子/栅格（非业务模块名）
-    "container",
-    "row",
-    "col"
-  ]);
-  var ATOMIC_PATTERNS = [
-    /^(m[trblxy]?|p[trblxy]?)\d{1,3}$/,
-    /^f\d{1,2}$/,
-    /^lh\d{1,3}$/,
-    /^fw(b|n|i|\d{3})$/,
-    /^ft\d{1,2}$/,
-    /^(m[trblxy]?|p[trblxy]?|gap|top|bottom|start|end|left|right)-\d+(\.\d+)?$/,
-    /^(w|h|min-w|min-h|max-w|max-h)-\d+$/,
-    /^text-(xs|sm|base|lg|xl|[2-9]xl|\d+xl)$/,
-    /^text-(gray|white|black|primary|secondary|danger|success|warning)(-\d+)?$/,
-    /^text-[0-9A-Fa-f]{3,8}(-\d+)?$/,
-    /^bg-[0-9A-Fa-f]{3,8}(-\d+)?$/,
-    /^bg-(gray|white|black|primary|secondary)(-\d+)?$/,
-    /^leading(-\w+)?(-\d+)?$/,
-    /^rounded(-\d+)?$/,
-    /^opacity-\d+$/,
-    /^z-\d+$/,
-    /^col(-\w+)?(-\d+)?$/,
-    /^g-[xy]?-\d+$/,
-    /^order-\d+$/,
-    /^d-(sm|md|lg|xl|xxl)-(none|flex|block|inline|inline-block|inline-flex|grid)$/,
-    /^(m|p|mt|mb|ml|mr|mx|my|pt|pb|pl|pr|px|py)-(sm|md|lg|xl|xxl)-\d+$/,
-    /^flex-(sm|md|lg|xl)-(row|column|grow-0|grow-1|shrink-0|shrink-1|wrap|nowrap)$/,
-    /^align-items-(sm|md|lg|xl)-(center|start|end|baseline|stretch)$/,
-    /^justify-content-(sm|md|lg|xl)-(center|start|end|between|around|evenly)$/,
-    /^text-(sm|md|lg|xl)-(start|end|center|left|right)$/
-  ];
   var PLUGIN_PATTERNS = [
     /^slick(-|$)/,
     /^ps(__|-|$)/,
     /^iconfont$/,
     /^icon-/
   ];
-  function isAtomic(name) {
-    if (ATOMIC_EXACT.has(name)) return true;
-    return ATOMIC_PATTERNS.some((re) => re.test(name));
-  }
   function isPlugin(name) {
     return PLUGIN_PATTERNS.some((re) => re.test(name));
   }
   function splitTokens(name) {
     return name.split("-").filter(Boolean);
   }
-  function hasBemConnector(name) {
-    return name.includes("__") || /--/.test(name);
-  }
   function looksLikePinyin(name) {
     return splitTokens(name).some((t) => PINYIN_TOKENS.has(t.toLowerCase()));
-  }
-  function isVisualNaming(name) {
-    const tokens = splitTokens(name);
-    if (tokens.some((t) => VISUAL_COLORS.has(t))) return true;
-    if (tokens.some((t) => VISUAL_SIZES.has(t))) return true;
-    return /^(red|blue|green|yellow|orange|purple|pink|gray|grey|black|white)-(title|text|btn|button|box|label|link)$/.test(name) || /^(big|small|large|tiny|huge)-(box|text|title|btn|button|font)$/.test(name);
-  }
-  function hasBadAbbrev(name) {
-    return splitTokens(name).some((t) => BAD_ABBREVS.has(t));
-  }
-  function isMeaningless(name) {
-    if (MEANINGLESS.has(name)) return true;
-    if (/^(box|item|div|span|wrap|wrapper|container|temp|test|tmp)\d+$/i.test(name)) return true;
-    if (/^[a-z]{1,2}\d{1,3}$/i.test(name)) return true;
-    if (/^(temp|test|tmp|demo|foo|bar|hello|world|asdf)(-|$)/i.test(name)) return true;
-    return false;
   }
   function isValidBusinessToken(token) {
     if (!/^[a-z][a-z0-9]*$/.test(token)) return false;
@@ -962,7 +848,7 @@
   }
   function uniqueExamples(list, original) {
     const seen = /* @__PURE__ */ new Set();
-    const scored = list.filter((ex) => ex.to && ex.to !== original && /^[a-z][a-z0-9-]*$/.test(ex.to)).map((ex) => {
+    const scored = list.filter((ex) => ex.to && ex.to !== original && matchesClassPattern(ex.to)).map((ex) => {
       const similar = similarityToOriginal(original, ex.to);
       const lexicon = ex.note.startsWith("\u8BCD\u5E93") ? 0.42 : 0;
       return { ex, score: similar + lexicon };
@@ -1000,10 +886,13 @@
     const tokens = splitTokens(kebab);
     const salvaged = salvageTokens(tokens);
     const push = (to, note) => {
-      const clean = to.replace(/--+/g, "-").replace(/^-|-$/g, "");
-      if (!clean || clean === name) return;
+      const clean = to.replace(/--+/g, (m) => m.length > 2 ? "--" : m).replace(/^-+|-+$/g, "");
+      if (!clean || clean === name || !matchesClassPattern(clean)) return;
       examples.push({ from: name, to: clean, note });
     };
+    if (codes.has("pattern") || codes.has("js-hook")) {
+      patternFixCandidates(name).forEach((ex) => push(ex.to, ex.note));
+    }
     if (codes.has("case") || codes.has("underscore") || codes.has("bem") || codes.has("hyphen-form")) {
       if (kebab && kebab !== name) push(kebab, "\u4EC5\u89C4\u8303\u4E3A\u5C0F\u5199\u77ED\u6A2A\u7EBF\uFF0C\u4FDD\u7559\u539F\u8BCD");
     }
@@ -1136,18 +1025,99 @@
         }
       }
     }
-    lexiconExampleCandidates(tokens).forEach((ex) => push(ex.to, ex.note));
+    const patternOnly = codes.size > 0 && [...codes].every((code) => code === "pattern" || code === "js-hook");
+    if (!patternOnly) {
+      lexiconExampleCandidates(tokens).forEach((ex) => push(ex.to, ex.note));
+    }
     for (const issue of issues) {
       const tip = (issue.suggestion || "").trim();
       if (!tip || /[\s/→,]/.test(tip)) continue;
-      if (/^[a-z][a-z0-9-]*$/.test(tip) && similarityToOriginal(name, tip) >= 0.35) {
+      if (/^[a-z][a-z0-9-]*$/.test(tip) && matchesClassPattern(tip) && similarityToOriginal(name, tip) >= 0.35) {
         push(tip, "\u6765\u81EA\u68C0\u6D4B\u5EFA\u8BAE\u7684\u76F4\u63A5\u6539\u540D");
       }
     }
     return uniqueExamples(examples, name);
   }
+  var CLASS_PATTERN = /^(?:(?:is|has)-[a-z0-9]+(?:-[a-z0-9]+)*|(?:l|g|u)-[a-z0-9]+(?:-[a-z0-9]+)*|[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:__[a-z0-9]+(?:-[a-z0-9]+)*)?(?:--[a-z0-9]+(?:-[a-z0-9]+)*)?)$/;
+  var KEBAB_NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+  function isJsHookClass(name) {
+    return name === "js" || /^js(?:-|__|--)/.test(name);
+  }
+  function matchesClassPattern(name) {
+    return CLASS_PATTERN.test(name) && !isJsHookClass(name);
+  }
+  function classifyClass(name) {
+    if (/^(?:is|has)-/.test(name)) {
+      return { kind: "state", message: "\u72B6\u6001\u7C7B\uFF1Ais-* / has-*" };
+    }
+    if (/^l-/.test(name)) return { kind: "atomic", message: "\u5E03\u5C40\u547D\u540D\u7A7A\u95F4\uFF1Al-*" };
+    if (/^g-/.test(name)) return { kind: "atomic", message: "\u5168\u5C40\u547D\u540D\u7A7A\u95F4\uFF1Ag-*" };
+    if (/^u-/.test(name)) return { kind: "atomic", message: "\u5DE5\u5177\u547D\u540D\u7A7A\u95F4\uFF1Au-*" };
+    if (name.includes("__") && name.includes("--")) {
+      return { kind: "structure", message: "BEM\uFF1Ablock__element--modifier" };
+    }
+    if (name.includes("__")) return { kind: "structure", message: "BEM \u5143\u7D20\uFF1Ablock__element" };
+    if (name.includes("--")) return { kind: "module", message: "BEM \u4FEE\u9970\u7B26\uFF1Ablock--modifier" };
+    return { kind: "module", message: "BEM \u5757\uFF1A\u5C0F\u5199\u77ED\u6A2A\u7EBF block" };
+  }
+  function cleanBemChunk(chunk) {
+    return chunk.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/[_\s]+/g, "-").replace(/[^a-z0-9-]+/gi, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
+  }
+  function flattenBem(name) {
+    const mods = name.split(/--+/);
+    const elements = (mods[0] || "").split(/__+/);
+    const block = cleanBemChunk(elements[0] || "");
+    const element = elements.slice(1).map(cleanBemChunk).filter(Boolean).join("-");
+    const modifier = mods.slice(1).map(cleanBemChunk).filter(Boolean).join("-");
+    let out = block;
+    if (element) out += `__${element}`;
+    if (modifier) out += `--${modifier}`;
+    return out;
+  }
+  function isDanglingPrefix(name) {
+    return /^(?:is|has|js|l|g|u)-+$/.test(name.trim());
+  }
+  function patternFixCandidates(name) {
+    const out = [];
+    const push = (to, note) => {
+      if (!to || to === name || !matchesClassPattern(to)) return;
+      if (out.some((ex) => ex.to === to)) return;
+      out.push({ from: name, to, note });
+    };
+    if (isDanglingPrefix(name)) return out;
+    if (isJsHookClass(name)) {
+      const stripped = name.replace(/^js(?:-|__|--)?/, "");
+      push(stripped, "\u53BB\u6389 js-\uFF1A\u7981\u6B62\u5728 CSS \u91CC\u4E3A JS \u94A9\u5B50\u5199\u6837\u5F0F");
+      push(toKebab(stripped).replace(/^-+|-+$/g, ""), "\u53BB\u6389 js- \u5E76\u6539\u4E3A kebab-case");
+    }
+    const flat = flattenBem(name);
+    const hasDoubleElement = name.split(/__+/).length > 2;
+    const hasDoubleModifier = name.split(/--+/).length > 2;
+    if (hasDoubleElement || hasDoubleModifier) {
+      push(flat, "BEM \u53EA\u4FDD\u7559\u4E00\u5C42 __ \u548C\u4E00\u5C42 --\uFF0C\u5176\u4F59\u6539\u6210\u77ED\u6A2A\u7EBF");
+    }
+    push(flat, "\u6574\u7406\u4E3A\u5408\u6CD5\u7C7B\u540D\uFF0C\u5C3D\u91CF\u4FDD\u7559\u539F\u8BCD");
+    const kebab = toKebab(name).replace(/^-+|-+$/g, "");
+    push(kebab, "\u6539\u4E3A\u5168\u5C0F\u5199\u77ED\u6A2A\u7EBF");
+    if (/_/.test(name) && !name.includes("__")) {
+      const asElement = flattenBem(name.replace(/_+/g, "__"));
+      push(asElement, "\u82E5\u8868\u793A\u5143\u7D20\uFF0C\u628A\u4E0B\u5212\u7EBF\u6539\u6210 BEM __");
+    }
+    if (/^\d/.test(kebab)) push(`block-${kebab}`, "\u7C7B\u540D\u4E0D\u80FD\u4EE5\u6570\u5B57\u5F00\u5934\uFF0C\u8865\u5757\u540D\u524D\u7F00");
+    const stem = kebab.replace(/^js-/, "").replace(/^-+|-+$/g, "");
+    const skipRolePrefix = isJsHookClass(name) || /^\d/.test(kebab);
+    if (!skipRolePrefix && stem && stem !== kebab && !/^(?:is|has|js|l|g|u)$/.test(stem)) {
+      push(stem, "\u53BB\u6389 js- \u524D\u7F00");
+    }
+    if (!skipRolePrefix && stem && !/^(?:is|has|l|g|u)-/.test(stem) && !isJsHookClass(stem) && !/^(?:is|has|js|l|g|u)$/.test(stem)) {
+      push(`is-${stem}`, "\u82E5\u662F\u72B6\u6001\uFF0C\u6539\u4E3A is-*");
+      push(`u-${stem}`, "\u82E5\u662F\u5DE5\u5177\u7C7B\uFF0C\u6539\u4E3A u-*");
+      push(`l-${stem}`, "\u82E5\u662F\u5E03\u5C40\u7C7B\uFF0C\u6539\u4E3A l-*");
+    }
+    return out;
+  }
   function checkClassName(raw) {
-    var _a;
+    var _a, _b;
     const name = raw.trim();
     const issues = [];
     if (!name) {
@@ -1159,7 +1129,7 @@
         examples: [{ from: "", to: "product-card", note: "\u8BF7\u8F93\u5165\u7C7B\u540D\u540E\u518D\u68C0\u6D4B" }]
       };
     }
-    if (isPlugin(name)) {
+    if (isPlugin(name) && !isJsHookClass(name) && matchesClassPattern(name)) {
       return {
         name,
         kind: "plugin",
@@ -1171,141 +1141,32 @@
         }]
       };
     }
-    if (isAtomic(name)) {
-      return {
-        name,
-        kind: "atomic",
-        severity: "pass",
-        issues: [{
-          code: "atomic-ok",
-          severity: "pass",
-          message: "\u539F\u5B50\u5DE5\u5177\u7C7B\uFF08\u767D\u540D\u5355\u547D\u4E2D\uFF09",
-          suggestion: "\u7981\u6B62\u7528\u539F\u5B50\u7C7B\u505A JS \u9009\u62E9\u5668"
-        }]
-      };
-    }
-    if (/[A-Z]/.test(name) || name !== name.toLowerCase()) {
-      issues.push({
-        code: "case",
-        severity: "fail",
-        message: "\u5FC5\u987B\u4F7F\u7528\u5C0F\u5199\u82F1\u6587 + \u77ED\u6A2A\u7EBF",
-        suggestion: toKebab(name)
-      });
-    }
-    if (name.includes("_")) {
-      issues.push({
-        code: "underscore",
-        severity: "fail",
-        message: "\u7981\u6B62\u4E0B\u5212\u7EBF\uFF0C\u5E94\u4F7F\u7528\u77ED\u6A2A\u7EBF",
-        suggestion: name.replace(/_/g, "-").toLowerCase()
-      });
-    }
-    if (hasBemConnector(name)) {
-      issues.push({
-        code: "bem",
-        severity: "fail",
-        message: "\u7981\u6B62 BEM \u8FDE\u63A5\u7B26 __ / --",
-        suggestion: name.replace(/__/g, "-").replace(/--/g, "-").replace(/-+/g, "-")
-      });
-    }
-    if (/\s/.test(name)) {
-      issues.push({
-        code: "space",
-        severity: "fail",
-        message: "\u5355\u4E2A\u7C7B\u540D\u4E0D\u80FD\u5305\u542B\u7A7A\u683C"
-      });
-    }
-    if (/[^a-z0-9-]/i.test(name)) {
-      issues.push({
-        code: "charset",
-        severity: "fail",
-        message: "\u7C7B\u540D\u4EC5\u5141\u8BB8\u5C0F\u5199\u82F1\u6587\u5B57\u6BCD\u3001\u6570\u5B57\u4E0E\u77ED\u6A2A\u7EBF"
-      });
-    }
-    if (/^-|-$|--/.test(name) || name.includes("--")) {
-      issues.push({
-        code: "hyphen-form",
-        severity: "fail",
-        message: "\u77ED\u6A2A\u7EBF\u4E0D\u80FD\u51FA\u73B0\u5728\u9996\u5C3E\uFF0C\u4E14\u4E0D\u80FD\u8FDE\u7EED"
-      });
-    }
-    if (/^\d/.test(name)) {
-      issues.push({
-        code: "leading-digit",
-        severity: "fail",
-        message: "\u7C7B\u540D\u4E0D\u80FD\u4EE5\u6570\u5B57\u5F00\u5934"
-      });
-    }
-    if (BARE_STATES.has(name)) {
-      const prefix = STATE_HAS.has(name) ? "has" : "is";
-      issues.push({
-        code: "bare-state",
-        severity: "fail",
-        message: `\u7981\u6B62\u88F8\u72B6\u6001\u7C7B\u300C${name}\u300D`,
-        suggestion: STATE_IS.has(name) || STATE_HAS.has(name) ? `${prefix}-${name}` : `is-${name}`
-      });
-    }
-    if (isMeaningless(name)) {
-      issues.push({
-        code: "meaningless",
-        severity: "fail",
-        message: "\u65E0\u610F\u4E49\u547D\u540D\uFF0C\u65E0\u6CD5\u7EF4\u62A4",
-        suggestion: "\u4F7F\u7528\u4E1A\u52A1\u8BED\u4E49\u540D\uFF0C\u5982 product-card\u3001filter-panel"
-      });
-    }
-    if (isVisualNaming(name)) {
-      issues.push({
-        code: "visual",
-        severity: "fail",
-        message: "\u7EAF\u89C6\u89C9\u547D\u540D\uFF08\u989C\u8272/\u5C3A\u5BF8\u8BCD\uFF09\uFF0C\u6539\u7248\u540E\u5931\u6548",
-        suggestion: "\u6539\u4E3A\u8BED\u4E49\u547D\u540D\uFF08\u5982 section-title\uFF09\u6216\u4F7F\u7528\u539F\u5B50\u5DE5\u5177\u7C7B"
-      });
-    }
-    if (looksLikePinyin(name)) {
-      issues.push({
-        code: "pinyin",
-        severity: "fail",
-        message: "\u7981\u6B62\u62FC\u97F3\u547D\u540D",
-        suggestion: "\u4F7F\u7528\u82F1\u6587\u8BED\u4E49\u8BCD\uFF0C\u5982 submit-btn"
-      });
-    }
-    if (hasBadAbbrev(name)) {
-      issues.push({
-        code: "bad-abbrev",
-        severity: "fail",
-        message: "\u7F29\u5199\u4E0D\u901A\u7528\uFF08\u4EC5\u5141\u8BB8 btn/img/desc/nav \u7B49\u901A\u7528\u7F29\u5199\uFF09",
-        suggestion: "\u6539\u7528\u5B8C\u6574\u5355\u8BCD\uFF0C\u5982 product-list\u3001verify-modal"
-      });
-    }
-    if (MODULE_TYPE_SUFFIXES.has(name)) {
-      issues.push({
-        code: "bare-module-type",
-        severity: "fail",
-        message: `\u88F8\u6A21\u5757\u7C7B\u578B\u300C${name}\u300D\u8BED\u4E49\u8FC7\u5BBD\uFF0C\u5FC5\u987B\u52A0\u4E1A\u52A1\u524D\u7F00`,
-        suggestion: `product-${name} / verify-${name}`
-      });
-    }
-    const role = matchRole(name);
-    if (!role) {
-      const tokens = splitTokens(name);
-      let suggestion = "\u9875\u9762\u7C7B page-* / \u6A21\u5757\u7C7B\u300C\u4E1A\u52A1+\u7C7B\u578B\u300D\u5982 product-card / \u7ED3\u6784\u7C7B\u5982 card-header / \u72B6\u6001\u7C7B is-*|has-* / JS \u94A9\u5B50 js-*-* / \u539F\u5B50\u7C7B";
-      if (tokens.length === 1) {
-        suggestion = `\u5355\u8BCD\u65E0\u6CD5\u5F52\u7C7B\u3002\u6A21\u5757\u7C7B\u793A\u4F8B\uFF1A${tokens[0]}-card\uFF1B\u7ED3\u6784\u7C7B\u793A\u4F8B\uFF1Aitem-title\uFF1B\u72B6\u6001\u7C7B\u793A\u4F8B\uFF1Ais-active`;
-      } else if (!endsWithModuleType(tokens)) {
-        suggestion = `\u672A\u4EE5\u89C4\u8303\u6A21\u5757\u7C7B\u578B\u7ED3\u5C3E\u3002\u53EF\u7528\u540E\u7F00\uFF1A${[...MODULE_TYPE_SUFFIXES].slice(0, 12).join(" / ")}\u2026\uFF1B\u6216\u6539\u4E3A\u7ED3\u6784\u7C7B card-header`;
+    if (!matchesClassPattern(name)) {
+      if (isJsHookClass(name)) {
+        const stripped = name.replace(/^js(?:-|__|--)?/, "");
+        issues.push({
+          code: "js-hook",
+          severity: "fail",
+          message: "\u4E25\u7981\u5728 CSS \u4E2D\u4E3A js-* \u94A9\u5B50\u7F16\u5199\u6837\u5F0F",
+          suggestion: stripped || "submit-btn"
+        });
+      } else {
+        const fixes = [...patternFixCandidates(name)].sort(
+          (a, b) => similarityToOriginal(name, b.to) - similarityToOriginal(name, a.to)
+        );
+        issues.push({
+          code: "pattern",
+          severity: "fail",
+          message: "\u4E0D\u7B26\u5408 selector-class-pattern\uFF1A\u8BF7\u4F7F\u7528 BEM\uFF08block / block__el / block--mod\uFF09\u3001\u72B6\u6001\u7C7B\uFF08is-/has-\uFF09\u6216\u547D\u540D\u7A7A\u95F4\uFF08l-/g-/u-\uFF09",
+          suggestion: (_a = fixes[0]) == null ? void 0 : _a.to
+        });
       }
+    } else {
+      const info = classifyClass(name);
       issues.push({
-        code: "role-mismatch",
-        severity: "fail",
-        message: "\u65E0\u6CD5\u5F52\u5165\u89C4\u8303\u804C\u8D23\u5206\u5C42\uFF0C\u7981\u6B62\u968F\u610F\u82F1\u6587\u8BCD\u5806\u53E0",
-        suggestion
-      });
-    } else if (!issues.some((i) => i.severity === "fail")) {
-      issues.push({
-        code: `${role.kind}-ok`,
+        code: "pattern-ok",
         severity: "pass",
-        message: role.message,
-        suggestion: role.suggestion
+        message: info.message
       });
     }
     const hasProblem = issues.some((i) => i.severity === "fail" || i.severity === "warn");
@@ -1314,13 +1175,14 @@
       filtered.push({ code: "ok", severity: "pass", message: "\u7B26\u5408\u547D\u540D\u89C4\u8303" });
     }
     const severity = worstSeverity(filtered);
+    const kind = matchesClassPattern(name) ? classifyClass(name).kind : "unknown";
     const examplePool = severity === "fail" || severity === "warn" ? buildOptimizeExamples(name, filtered) : void 0;
     return {
       name,
-      kind: (role == null ? void 0 : role.kind) || "unknown",
+      kind,
       severity,
       issues: filtered,
-      suggestion: (_a = filtered.find((i) => i.suggestion)) == null ? void 0 : _a.suggestion,
+      suggestion: (_b = filtered.find((i) => i.suggestion)) == null ? void 0 : _b.suggestion,
       examplePool,
       exampleCursor: 0,
       examples: examplePool ? sliceExampleBatch(examplePool, 0) : void 0
@@ -1359,6 +1221,97 @@
   function unique(arr) {
     return [...new Set(arr.filter(Boolean))];
   }
+  function stripScssComments(source) {
+    return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+  }
+  function makeStructuralResult(name, message, suggestion) {
+    const issues = [{ code: "scss-structure", severity: "fail", message, suggestion }];
+    const replacement = suggestion && suggestion !== name ? name.startsWith("@mixin ") ? `@mixin ${suggestion}` : name.startsWith("@function ") ? `@function ${suggestion}` : suggestion : "";
+    const pool = replacement ? [{ from: name, to: replacement, note: "\u6539\u4E3A kebab-case" }] : void 0;
+    return {
+      name,
+      kind: "unknown",
+      severity: "fail",
+      issues,
+      suggestion,
+      examplePool: pool,
+      exampleCursor: 0,
+      examples: pool ? sliceExampleBatch(pool, 0) : void 0
+    };
+  }
+  function analyzeScss(source) {
+    const text = stripScssComments(source);
+    const results = [];
+    const seen = /* @__PURE__ */ new Set();
+    const push = (name, message, suggestion) => {
+      const key = `${name}|${message}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      results.push(makeStructuralResult(name, message, suggestion));
+    };
+    for (const match of text.matchAll(/\$([A-Za-z_][\w-]*)/g)) {
+      if (!KEBAB_NAME.test(match[1])) {
+        push(`$${match[1]}`, "SCSS \u53D8\u91CF\u540D\u5FC5\u987B\u91C7\u7528 kebab-case\uFF0C\u4F8B\u5982 $color-primary", `$${toKebab(match[1])}`);
+      }
+    }
+    for (const match of text.matchAll(/@mixin\s+([A-Za-z_][\w-]*)/g)) {
+      if (!KEBAB_NAME.test(match[1])) {
+        push(`@mixin ${match[1]}`, "Mixin \u540D\u79F0\u5FC5\u987B\u91C7\u7528 kebab-case", toKebab(match[1]));
+      }
+    }
+    for (const match of text.matchAll(/@function\s+([A-Za-z_][\w-]*)/g)) {
+      if (!KEBAB_NAME.test(match[1])) {
+        push(`@function ${match[1]}`, "Function \u540D\u79F0\u5FC5\u987B\u91C7\u7528 kebab-case", toKebab(match[1]));
+      }
+    }
+    const stack = [];
+    let ruleDepth = 0;
+    let buf = "";
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (ch === ";") {
+        buf = "";
+        continue;
+      }
+      if (ch === "{") {
+        const header = buf.trim();
+        buf = "";
+        const at = header.match(/^@([a-zA-Z-]+)/);
+        const ignoreAt = !!at && ["media", "supports", "include"].includes(at[1].toLowerCase());
+        const pseudoOnly = /^(?:&?::?[a-z-]+(?:\([^)]*\))?)(?:\s*,\s*&?::?[a-z-]+(?:\([^)]*\))?)*$/i.test(header) && !header.includes(".");
+        const counts = !!header && !ignoreAt && !pseudoOnly && !at;
+        if (counts) ruleDepth += 1;
+        if (counts && ruleDepth > 3) {
+          push(header.slice(0, 60), `\u5D4C\u5957\u6DF1\u5EA6 ${ruleDepth} \u8D85\u8FC7\u4E0A\u9650 3\uFF08\u4F2A\u7C7B\u3001@media\u3001@supports\u3001@include \u4E0D\u8BA1\u5165\uFF09`);
+        }
+        if (header && !at) {
+          header.split(",").forEach((sel) => {
+            const selector = sel.trim();
+            if (!selector) return;
+            if (/#[A-Za-z_][\w-]*/.test(selector)) {
+              push(selector.slice(0, 60), "\u7981\u7528 ID \u9009\u62E9\u5668\uFF08selector-max-id: 0\uFF09");
+            }
+            const compounds = selector.replace(/&/g, " ").split(/\s*(?:>|\+|~)\s*|\s+/).filter((part) => part && part !== "&");
+            if (compounds.length > 3) {
+              push(selector.slice(0, 60), `\u590D\u5408\u9009\u62E9\u5668\u6709 ${compounds.length} \u6BB5\uFF0C\u6700\u591A\u5141\u8BB8 3 \u6BB5`);
+            }
+          });
+        }
+        stack.push(counts);
+        continue;
+      }
+      if (ch === "}") {
+        if (stack.pop()) ruleDepth = Math.max(0, ruleDepth - 1);
+        buf = "";
+        continue;
+      }
+      if (ch !== "\n" && ch !== "\r") buf += ch;
+      else if (buf.trim() && !buf.includes("{")) {
+        buf += " ";
+      }
+    }
+    return results;
+  }
   function summarize(results) {
     const summary = { total: results.length, pass: 0, warn: 0, fail: 0, info: 0 };
     results.forEach((r) => {
@@ -1369,12 +1322,16 @@
     });
     return summary;
   }
+  function displayToken(name) {
+    if (/^[.$#@]/.test(name) || /\s/.test(name)) return name;
+    return `.${name}`;
+  }
   function kindLabel(kind) {
     const map = {
-      atomic: "\u539F\u5B50\u5DE5\u5177\u7C7B",
+      atomic: "\u547D\u540D\u7A7A\u95F4 l/g/u",
       page: "\u9875\u9762\u7C7B",
-      module: "\u6A21\u5757\u7C7B",
-      structure: "\u7ED3\u6784\u7C7B",
+      module: "BEM \u5757",
+      structure: "BEM \u5143\u7D20",
       state: "\u72B6\u6001\u7C7B",
       "js-hook": "JS \u94A9\u5B50",
       plugin: "\u63D2\u4EF6\u7C7B",
@@ -1512,7 +1469,7 @@
     renderResults();
   }
   function applyOptimizeExample(from, to) {
-    var _a;
+    var _a, _b;
     const input = $("#js-naming-input");
     if (!input) return;
     if (state.mode === "list") {
@@ -1539,6 +1496,16 @@
       }
       input.value = next.join("\n").replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "");
     } else if (state.mode === "scss") {
+      if ((from.startsWith("$") || from.startsWith("@")) && input.value.includes(from)) {
+        input.value = input.value.replace(from, to);
+        runCheck(false);
+        const adopted = ((_a = $("#js-naming-input")) == null ? void 0 : _a.value) || "";
+        pushHistory(adopted, summarize(state.results), {
+          adopt: { from, to },
+          dedupe: false
+        });
+        return;
+      }
       const re = new RegExp(`\\.${from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
       if (re.test(input.value)) {
         input.value = input.value.replace(re, `.${to}`);
@@ -1567,7 +1534,7 @@
       }
     }
     runCheck(false);
-    const current = ((_a = $("#js-naming-input")) == null ? void 0 : _a.value) || "";
+    const current = ((_b = $("#js-naming-input")) == null ? void 0 : _b.value) || "";
     pushHistory(current, summarize(state.results), {
       adopt: { from, to },
       dedupe: false
@@ -1584,7 +1551,26 @@
     } else {
       names = parseClassList(input);
     }
-    state.results = names.map(checkClassName);
+    state.results = names.map((name) => {
+      const result = checkClassName(name);
+      if (state.mode !== "html" || !isJsHookClass(result.name) || result.severity !== "fail") return result;
+      return {
+        ...result,
+        kind: "js-hook",
+        severity: "info",
+        issues: [{
+          code: "js-hook-html",
+          severity: "info",
+          message: "JS \u94A9\u5B50\u53EF\u4EE5\u5199\u5728 HTML \u4E0A\uFF0C\u4F46\u4E0D\u8981\u5728 CSS \u91CC\u4E3A\u5B83\u5199\u6837\u5F0F"
+        }],
+        suggestion: void 0,
+        examplePool: void 0,
+        examples: void 0
+      };
+    });
+    if (state.mode === "scss") {
+      state.results = state.results.concat(analyzeScss(input));
+    }
     renderResults();
     if (saveToHistory) {
       pushHistory(input, summarize(state.results));
@@ -1654,9 +1640,9 @@
           ${examples.map((ex) => `
             <li class="checker-optimize-item">
               <div class="checker-optimize-pair">
-                <code class="is-from">.${escapeHtml(ex.from || r.name)}</code>
+                <code class="is-from">${escapeHtml(displayToken(ex.from || r.name))}</code>
                 <span class="checker-optimize-arrow">\u2192</span>
-                <code class="is-to">.${escapeHtml(ex.to)}</code>
+                <code class="is-to">${escapeHtml(displayToken(ex.to))}</code>
               </div>
               <span class="checker-optimize-note">${escapeHtml(ex.note)}</span>
               <button type="button" class="checker-btn checker-btn-sm checker-btn-primary js-apply-example"
@@ -1669,7 +1655,7 @@
       return `
       <article class="checker-result-item is-${r.severity}" data-name="${escapeAttr(r.name)}">
         <div class="checker-result-head">
-          <code class="checker-class-name">.${escapeHtml(r.name)}</code>
+          <code class="checker-class-name">${escapeHtml(displayToken(r.name))}</code>
           <span class="checker-badge checker-badge-${r.severity}">${severityLabel(r.severity)}</span>
           <span class="checker-kind">${kindLabel(r.kind)}</span>
         </div>
@@ -1693,12 +1679,12 @@
       "".padEnd(48, "-")
     ];
     state.results.forEach((r) => {
-      lines.push(`[${severityLabel(r.severity)}] .${r.name}\uFF08${kindLabel(r.kind)}\uFF09`);
+      lines.push(`[${severityLabel(r.severity)}] ${displayToken(r.name)}\uFF08${kindLabel(r.kind)}\uFF09`);
       r.issues.forEach((i) => {
         lines.push(`  - ${i.message}${i.suggestion ? ` \u2192 ${i.suggestion}` : ""}`);
       });
       (r.examples || []).forEach((ex) => {
-        lines.push(`  \xB7 \u4F18\u5316\uFF1A.${ex.from || r.name} \u2192 .${ex.to}\uFF08${ex.note}\uFF09`);
+        lines.push(`  \xB7 \u4F18\u5316\uFF1A${displayToken(ex.from || r.name)} \u2192 ${displayToken(ex.to)}\uFF08${ex.note}\uFF09`);
       });
     });
     return lines.join("\n");
@@ -1715,16 +1701,16 @@
       if (mode === "html") {
         input.placeholder = "\u7C98\u8D34 HTML \u7247\u6BB5\uFF0C\u81EA\u52A8\u63D0\u53D6 class / className / th:classappend \u4E2D\u7684\u7C7B\u540D\u2026";
       } else if (mode === "scss") {
-        input.placeholder = "\u7C98\u8D34 SCSS/CSS\uFF0C\u81EA\u52A8\u63D0\u53D6\u7C7B\u9009\u62E9\u5668\uFF08\u5982 .product-card .is-active\uFF09\u2026";
+        input.placeholder = "\u7C98\u8D34 SCSS/CSS\u3002\u4F1A\u6821\u9A8C\u7C7B\u540D\uFF0C\u4EE5\u53CA\u5D4C\u5957\u6DF1\u5EA6\u3001ID \u9009\u62E9\u5668\u3001\u590D\u5408\u9009\u62E9\u5668\u3001$\u53D8\u91CF / mixin / function \u547D\u540D\u2026";
       } else {
-        input.placeholder = "\u6BCF\u884C\u4E00\u4E2A\u7C7B\u540D\uFF0C\u6216\u7528\u7A7A\u683C / \u9017\u53F7\u5206\u9694\u2026\n\u53EA\u6709\u7B26\u5408\u804C\u8D23\u5206\u5C42\u7684\u7C7B\u540D\u624D\u4F1A\u901A\u8FC7\uFF1A\nproduct-card / card-header / is-active / js-submit-btn";
+        input.placeholder = "\u6BCF\u884C\u4E00\u4E2A\u7C7B\u540D\uFF0C\u6216\u7528\u7A7A\u683C / \u9017\u53F7\u5206\u9694\u2026\n\u901A\u8FC7\uFF1Ablock\u3001block__el\u3001block--mod\u3001is-active\u3001l-grid\u3001u-mt-8\n\u4E0D\u901A\u8FC7\uFF1Ajs-submit-btn\u3001ProductCard\u3001block__el__sub";
       }
     }
     if (hint) {
       const hints = {
-        list: "\u9ED8\u8BA4\u62D2\u7EDD\uFF1A\u968F\u610F\u82F1\u6587\u8BCD\u4E0D\u4F1A\u901A\u8FC7\uFF0C\u5FC5\u987B\u7B26\u5408 page/\u6A21\u5757/\u7ED3\u6784/\u72B6\u6001/js/\u539F\u5B50/\u63D2\u4EF6\u89C4\u5219",
-        html: "\u4ECE HTML \u6279\u91CF\u63D0\u53D6\u5E76\u4E25\u683C\u68C0\u6D4B\u6240\u6709 class",
-        scss: "\u4ECE\u6837\u5F0F\u8868\u6279\u91CF\u63D0\u53D6\u7C7B\u9009\u62E9\u5668\u5E76\u4E25\u683C\u68C0\u6D4B"
+        list: "\u89C4\u5219\uFF1ABEM\uFF08block / block__el / block--mod\uFF09\u3001\u72B6\u6001\u7C7B is-/has-\u3001\u547D\u540D\u7A7A\u95F4 l-/g-/u-\u3002\u7981\u6B62\u7ED9 js-* \u5199\u6837\u5F0F\u3002",
+        html: "\u4ECE HTML \u63D0\u53D6 class \u5E76\u6309 selector-class-pattern \u68C0\u6D4B\u3002js-* \u5141\u8BB8\u51FA\u73B0\u5728 HTML\uFF0C\u4F46\u4E0D\u80FD\u5728 CSS \u91CC\u5199\u6837\u5F0F\u3002",
+        scss: "\u7C7B\u540D + \u5D4C\u5957\u22643 + \u7981\u6B62 ID + \u590D\u5408\u9009\u62E9\u5668\u22643 + \u53D8\u91CF/mixin/function \u4F7F\u7528 kebab-case"
       };
       hint.textContent = hints[mode];
     }
@@ -1733,72 +1719,46 @@
     const input = $("#js-naming-input");
     if (!input) return;
     if (state.mode === "html") {
-      input.value = `<div class="product-card d-flex mt20 js-product-card" data-product-id="123">
-  <div class="card-img"></div>
-  <div class="card-body">
-    <div class="item-title f16 fwb">Product Name</div>
-    <div class="red-title">Bad visual name</div>
-    <div class="hello">Random word</div>
-  </div>
-  <button class="primary-btn js-add-cart is-disabled active">Add</button>
+      input.value = `<div class="cart cart__item is-selected js-cart-item">
+  <button class="cart__submit u-mt-8 ProductCard">Add</button>
 </div>`;
     } else if (state.mode === "scss") {
-      input.value = `.page-product-detail {
-  .sidebar-recommend-card {}
+      input.value = `$color-primary: #ea6025;
+$ColorPrimary: #000;
+
+@mixin text-truncate {}
+@mixin TextTruncate {}
+
+.cart {
+  .cart__item {
+    &.is-selected {}
+    .cart__price {
+      .cart__num {}
+    }
+  }
 }
-.product-card {
-  .card-header {}
-  &.is-active {}
-  &.active {}
-}
-.hello {}
-.red-title {}`;
+#app .cart {}
+.a .b .c .d {}
+.js-submit-btn {}
+.block__el__sub {}`;
     } else {
       input.value = [
-        // 应通过
-        "product-card",
-        "page-product-detail",
-        "card-header",
-        "item-title",
-        "primary-btn",
+        "cart",
+        "cart__item",
+        "cart--compact",
+        "cart__item--selected",
         "is-active",
         "has-error",
+        "l-grid",
+        "g-container",
+        "u-mt-8",
+        "u-text-truncate",
         "js-submit-btn",
-        "d-flex",
-        "mt20",
-        "f16",
-        "slick-current",
-        "verify-modal",
-        "category-filter-panel",
-        // 应失败：随便单词 / 无职责
-        "hello",
-        "world",
-        "apple",
-        "foobar",
-        "hello-world",
-        "nice-thing",
-        "my-custom",
-        "product",
-        "card",
-        // 应失败：禁止项
-        "active",
-        "show",
-        "error",
-        "red-title",
-        "blue-btn",
-        "big-box",
-        "box1",
-        "aaa",
-        "temp",
-        "tijiao-btn",
-        "productCard",
+        "ProductCard",
         "product_card",
-        "prd-list",
-        "vfy-modal",
-        "is-happy",
-        "has-banana",
-        "js-hello",
-        "page-x"
+        "block__el__sub",
+        "block--mod--extra",
+        "1item"
       ].join("\n");
     }
   }
