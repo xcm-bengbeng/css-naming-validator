@@ -14,9 +14,9 @@
         <div class="container">
             <h1 class="checker-hero-title">CSS 选择器命名规范检测</h1>
             <p class="checker-hero-desc">
-                依据《HTML 页面 CSS 选择器命名规范》v1.0，批量检测类名是否符合小写短横线、状态前缀、JS 钩子、语义命名等规则。支持类名列表、HTML 片段与 SCSS 选择器三种输入。
+                依据《HTML 页面 CSS 选择器命名规范》v1.0 严格检测：默认不合规，只有能归入职责分层且命中词表/形态的类名才会通过。随意英文词、无业务前缀的裸类型、非白名单状态词一律拒绝。
             </p>
-            <p class="checker-hero-meta">推荐模型：页面类 + 模块类 + 结构类 + 原子工具类 + 状态类 + js-* + data-*</p>
+            <p class="checker-hero-meta">仅通过：page-* · 业务+模块类型 · 结构类 · is-*/has-*（白名单）· js-*-* · 原子白名单 · 插件类</p>
         </div>
     </div>
 
@@ -38,6 +38,15 @@
                     <button type="button" class="checker-btn js-btn-example" id="js-btn-example">填入示例并检测</button>
                     <button type="button" class="checker-btn js-btn-clear" id="js-btn-clear">清空</button>
                     <button type="button" class="checker-btn js-btn-copy" id="js-btn-copy">复制报告</button>
+                </div>
+
+                <div class="checker-history">
+                    <div class="checker-history-head">
+                        <h3 class="checker-history-title">检测历史</h3>
+                        <button type="button" class="checker-btn checker-btn-sm" id="js-btn-clear-history">清空历史</button>
+                    </div>
+                    <p class="checker-history-empty" id="js-history-empty">暂无历史，检测后会自动保存在本机浏览器</p>
+                    <div class="checker-history-list" id="js-history-list"></div>
                 </div>
             </section>
 

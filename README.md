@@ -2,12 +2,18 @@
 
 纯静态页面，不依赖后端。上传到 GitHub 后用 GitHub Pages 即可在线运行。
 
-依据《HTML 页面 CSS 选择器命名规范》v1.0，支持：
+依据《HTML 页面 CSS 选择器命名规范》v1.0，**默认拒绝**，仅当类名符合职责分层时通过：
 
-- 类名列表批量检测
-- 从 HTML 片段提取 `class`
-- 从 SCSS / CSS 提取类选择器
-- 按通过 / 警告 / 不合规筛选，并按关键词检索
+| 类型 | 通过条件 |
+|------|----------|
+| 页面类 | `page-product-detail`（单段仅允许 home/cart 等白名单） |
+| 模块类 | `业务名 + 模块类型`，如 `product-card`、`verify-modal` |
+| 结构类 | `card-header`、`item-title`、`primary-btn` |
+| 状态类 | `is-*` / `has-*` 且状态词在规范白名单内 |
+| JS 钩子 | `js-` + 至少两段，且含角色词（btn/modal/…） |
+| 原子 / 插件 | 封闭白名单或 slick/ps/icon 前缀 |
+
+`hello`、`apple`、`hello-world`、`is-happy`、`js-foo` 等随意命名都会判为不合规。
 
 ## 上传并运行
 
